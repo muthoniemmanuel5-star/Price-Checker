@@ -1,0 +1,34 @@
+name: Daily Price Check
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Runs at 8:00 AM UTC
+  workflow_dispatch:   # Lets you run it manually for testing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 pandas
+
+      - name: Run script
+        env:
+          # This connects your GitHub Secrets to your Python code
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        run: python main.py
+
+      - name: Save CSV Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: price-log
+          path: price_log.csv
